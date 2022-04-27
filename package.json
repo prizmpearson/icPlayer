@@ -1,0 +1,22 @@
+{
+  "name": "prizmicplayer",
+  "version": "1.0.0",
+  "description": "prizm ic player",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prizmpearson/icPlayer.git"
+  },
+  "keywords": [
+    "icPlayer"
+  ],
+  "author": "PrizmPearson",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/prizmpearson/icPlayer/issues"
+  },
+  "homepage": "https://github.com/prizmpearson/icPlayer#readme"
+}
