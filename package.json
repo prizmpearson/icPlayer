@@ -1,7 +1,7 @@
 {
-  "name": "prizmicplayer",
+  "name": "prizm-icPlayer",
   "version": "1.0.0",
-  "description": "prizm ic player",
+  "description": "prizm icplayer",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
