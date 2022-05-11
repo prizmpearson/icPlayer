@@ -3630,7 +3630,7 @@ var MediaAnalyserService = exports.MediaAnalyserService = function () {
     function MediaAnalyserService() {
         _classCallCheck(this, MediaAnalyserService);
 
-        this.audioContext = AudioContextSingleton.getOrCreate();
+        this.audioContext = new (AudioContext || webkitAudioContext)();
         this.mediaStreamSource = null;
         this.mediaElementSource = null;
     }
@@ -3679,9 +3679,9 @@ var MediaAnalyserService = exports.MediaAnalyserService = function () {
         key: "destroy",
         value: function destroy() {
             this.closeAnalyzing();
-            AudioContextSingleton.close();
-            this.audioContext = null;
+            this.audioContext.close();
             this.mediaElementSource = null;
+            this.audioContext = null;
             this.mediaStreamSource = null;
         }
     }]);

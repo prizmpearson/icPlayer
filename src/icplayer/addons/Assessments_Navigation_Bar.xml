@@ -147,9 +147,7 @@
         S_07: "Number of buttons property have to be an integer",
         S_08: "Number of buttons can't be greater than number of pages in sections",
         S_09: "Buttons width property can't be equal or below 0.",
-        S_10: "Buttons width property have to be an integer",
-        S_11: "Pages CSS classes are invalid on section: %section% in sections property. Number of CSS classes is too small.",
-        S_12: "Pages CSS classes are invalid on section: %section% in sections property. At least one of CSS classes is invalid.",
+        S_10: "Buttons width property have to be an integer"
     };
 
     presenter.DEFAULT_TTS_PHRASES = {
@@ -168,7 +166,6 @@
         SECTION_NAME: "section_name",
         NEXT: "next",
         BUTTON: "button",
-        ELEMENT: "element",
         TURN_BACK: "turn_back",
         TURN_FORWARD: "turn_forward",
         CURRENT_PAGE: "current_page",
@@ -345,9 +342,8 @@
         return a;
     }
 
-    presenter.Button = function (viewDescription, customCssClassNames) {
-        this.description = viewDescription;
-        this.customCssClassNames = customCssClassNames;
+    presenter.Button = function (view_description) {
+        this.description = view_description;
         this.$view = this.createView();
         this.$view_text;
         this.actualCommand;
@@ -355,6 +351,7 @@
         this.isActualButton = false;
 
         this.connectEvents();
+        this.$view.addClass("element");
     };
 
     presenter.Button.prototype.connectEvents = function () {
@@ -429,14 +426,8 @@
         this.$view_text.addClass(presenter.CSS_CLASSES.BUTTON_TEXT);
 
         $view.append(this.$view_text);
-        $view.addClass(presenter.CSS_CLASSES.BUTTON);
-        $view.addClass(presenter.CSS_CLASSES.ELEMENT);
 
-        if (this.customCssClassNames &amp;&amp; this.customCssClassNames.length !== 0) {
-            this.customCssClassNames.map((cssClassName) =&gt; {
-                $view.addClass(cssClassName);
-            })
-        }
+        $view.addClass("button");
 
         return $view;
     };
@@ -446,16 +437,16 @@
     };
 
     presenter.Button.prototype.addInactiveClass = function () {
-        this.$view.addClass(presenter.CSS_CLASSES.INACTIVE);
+        this.$view.addClass("inactive");
     };
 
     presenter.Button.prototype.removeInactiveClass = function () {
-        this.$view.removeClass(presenter.CSS_CLASSES.INACTIVE);
+        this.$view.removeClass("inactive");
     };
 
     presenter.NavigationButtonLeft = function () {
         presenter.Button.call(this, "&lt;");
-        this.$view.removeClass(presenter.CSS_CLASSES.BUTTON);
+        this.$view.removeClass("button");
         this.$view.addClass(presenter.CSS_CLASSES.PREVIOUS);
         this.setCommand(function () {
             presenter.navigationManager.goLeft();
@@ -468,7 +459,7 @@
     presenter.NavigationButtonRight = function () {
         presenter.Button.call(this, "&gt;");
         this.$view.addClass(presenter.CSS_CLASSES.NEXT);
-        this.$view.removeClass(presenter.CSS_CLASSES.BUTTON);
+        this.$view.removeClass("button");
         this.setCommand(function () {
             presenter.navigationManager.goRight();
         });
@@ -480,7 +471,7 @@
     presenter.HellipButton = function (hellipFunction, className) {
         presenter.Button.call(this, "&amp;hellip;"); // ...
         this.$view_text.html(this.description);
-        this.$view.removeClass(presenter.CSS_CLASSES.BUTTON);
+        this.$view.removeClass("button");
         this.$view.addClass(className);
 
         this.setCommand(hellipFunction);
@@ -489,13 +480,12 @@
     presenter.HellipButton.prototype = Object.create(presenter.Button.prototype);
     presenter.HellipButton.constructor = presenter.HellipButton;
 
-    presenter.Page = function (page, view_description, sectionName, sectionCssClass, buttonCssClassNames) {
+    presenter.Page = function (page, view_description, sectionName, sectionCssClass) {
         this.description = view_description;
         this.page = page;
         this.isBookmarkOn = false;
         this.sectionName = sectionName;
         this.sectionCssClass = sectionCssClass;
-        this.buttonCssClassNames = buttonCssClassNames;
     };
 
     presenter.Page.prototype.setBookmarkOn = function (bookmark) {
@@ -521,10 +511,9 @@
         return presenter.currentPageIndex === this.page;
     };
 
-    presenter.Section = function (pages, sectionName, pagesDescriptions, sectionCssClassName, buttonsCssClassNames) {
+    presenter.Section = function (pages, sectionName, pagesDescriptions, sectionCssClassName) {
         this.name = sectionName;
-        this.cssClassName = sectionCssClassName;
-        this.buttonsCssClassNames = buttonsCssClassNames;
+        this.cssClass = sectionCssClassName;
         this.pages = this.createPages(pages, pagesDescriptions);
     };
 
@@ -544,10 +533,7 @@
 
         return pagesToCreate.map(function (page, index) {
             if (page == -1) return null;
-            return new presenter.Page(
-                page, pagesDescriptions[index], this.name,
-                this.cssClassName, this.buttonsCssClassNames
-            );
+            return new presenter.Page(page, pagesDescriptions[index], this.name, this.cssClass);
         }, this).filter(function(page) {
             return page != null;
         });
@@ -710,11 +696,7 @@
         return sections.map(
             function (section, index) {
                 var sectionCssClass = "section_" + index;
-                return new presenter.Section(
-                    section.pages, section.sectionName,
-                    section.pagesDescriptions, sectionCssClass,
-                    section.sectionButtonsCssClassNames
-                );
+                return new presenter.Section(section.pages, section.sectionName, section.pagesDescriptions, sectionCssClass);
         });
     };
 
@@ -1036,7 +1018,7 @@
     };
 
     presenter.NavigationManager.prototype.getPageButton = function (page) {
-        var button = new presenter.Button(page.description, page.buttonCssClassNames);
+        var button = new presenter.Button(page.description);
         button.setCommand(page.getChangeToPageCommand());
         button.setNavigateToPage(page.page);
 
@@ -1499,38 +1481,6 @@
         };
     }
 
-    presenter.parseSectionButtonsCssClassNames = function (cssClasses, sectionIndex) {
-        if (ModelValidationUtils.isStringEmpty(cssClasses)) {
-            return getErrorObject("S_11", {section: sectionIndex});
-        }
-
-        var parsedCssClasses = cssClasses.split(",").map(getTrimmedStringElement);
-        var cssClassesWithoutDuplication = removeDuplicatedCssClassNames(parsedCssClasses);
-
-        for (var i = 0; i &lt; cssClassesWithoutDuplication.length; i++) {
-            if (ModelValidationUtils.isStringEmpty(cssClassesWithoutDuplication[i])) {
-                return getErrorObject("S_11", {section: sectionIndex});
-            }
-
-            if (!isValidClassName(cssClassesWithoutDuplication[i])) {
-                return getErrorObject("S_12", {section: sectionIndex});
-            }
-        }
-
-        return {
-            isValid: true,
-            cssClasses: cssClassesWithoutDuplication
-        };
-    }
-
-    function removeDuplicatedCssClassNames(cssClassNames) {
-        return [...new Set(cssClassNames)];
-    }
-
-    function isValidClassName(className) {
-        return /^[a-z_-][a-z\d_-]*$/i.test(className);
-    }
-
     function changeToStringOneBigger (element) {
         return ((element + 1) + "");
     }
@@ -1540,7 +1490,6 @@
         var len = section.length;
         var sectionName = "";
         var descriptions = [];
-        var sectionButtonsCssClassNames = {cssClasses: []};
 
         var pages = presenter.parsePagesFromRange(section[0], (sectionIndex + 1));
 
@@ -1563,19 +1512,11 @@
             };
         }
 
-        if (len &gt; 3) {
-            sectionButtonsCssClassNames = presenter.parseSectionButtonsCssClassNames(section[3], (sectionIndex + 1));
-            if (!sectionButtonsCssClassNames.isValid) {
-                return sectionButtonsCssClassNames;
-            }
-        }
-
         return {
             isValid: true,
             pages: pages.pages,
             sectionName: sectionName,
-            pagesDescriptions: descriptions.descriptions,
-            sectionButtonsCssClassNames: sectionButtonsCssClassNames.cssClasses,
+            pagesDescriptions: descriptions.descriptions
         }
     }
 
@@ -1657,7 +1598,6 @@
                 description: page.description,
                 sectionName: page.sectionName,
                 sectionCssClass: page.sectionCssClass,
-                buttonCssClassNames: page.buttonCssClassNames,
                 isBookmarkOn: page.isBookmarkOn
             };
         });
@@ -1672,10 +1612,7 @@
 
     function getRestorePagesObjectArray (pages) {
         var restoredPages = pages.map(function (page) {
-            var restoredPage = new presenter.Page(
-                page.page, page.description, page.sectionName,
-                page.sectionCssClass, page.buttonCssClassNames
-            );
+            var restoredPage = new presenter.Page(page.page, page.description, page.sectionName, page.sectionCssClass);
             restoredPage.setBookmarkOn(page.isBookmarkOn);
 
             return restoredPage;
@@ -1731,8 +1668,7 @@
     };
 
     presenter.upgradeState = function (state) {
-        var upgradedState = presenter.upgradeAttemptedPages(state);
-        return presenter.upgradePagesButtonCssClassNames(upgradedState);
+        return presenter.upgradeAttemptedPages(state);
     };
 
     presenter.upgradeAttemptedPages = function (state) {
@@ -1741,21 +1677,6 @@
 
         if(state.attemptedPages === undefined) {
             upgradedState["attemptedPages"] = [];
-        }
-
-        return upgradedState;
-    };
-
-    presenter.upgradePagesButtonCssClassNames = function (state) {
-        var upgradedState = {};
-        jQuery.extend(true, upgradedState, state); // Deep copy of model object
-
-        if (upgradedState.pages) {
-            upgradedState.pages.map(function (page) {
-                if(page.buttonCssClassNames === undefined) {
-                    page["buttonCssClassNames"] = [];
-                }
-            });
         }
 
         return upgradedState;

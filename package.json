@@ -1,5 +1,5 @@
 {
-  "name": "prizm-icPlayer",
+  "name": "prizmicplayer",
   "version": "1.0.0",
   "description": "prizm icplayer",
   "main": "index.js",
@@ -18,5 +18,7 @@
   "bugs": {
     "url": "https://github.com/prizmpearson/icPlayer/issues"
   },
-  "homepage": "https://github.com/prizmpearson/icPlayer#readme"
+  "homepage": "https://github.com/prizmpearson/icPlayer#readme",
+  "dependencies": {
+  }
 }

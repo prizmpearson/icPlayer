@@ -875,7 +875,6 @@ div.paragraph-lock {
         var tinymceState;
         if (presenter.editor != undefined &amp;&amp; presenter.editor.hasOwnProperty("id")) {
             try{
-                if (presenter.isShowAnswersActive) presenter.hideAnswers();
                 tinymceState = presenter.editor.getContent({format : 'raw'});
             }catch(err) {
                 return  presenter.state;
